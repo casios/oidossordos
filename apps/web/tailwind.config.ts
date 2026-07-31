@@ -1,6 +1,6 @@
 // apps/web/tailwind.config.ts
 // Tokens tomados directamente de diseno-frontend.md sección 5.2 —
-// fondo negro, blanco hueso, cobre fundido como único acento.
+// fondo carbón oscuro, blanco hueso, rojo como único acento (referencia W:O:A).
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
@@ -8,13 +8,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: '#0A0A0A',
-        stripe: '#141414',
+        bg: '#1E2024',
+        stripe: '#292C31',
         fg: '#EDEDE8',
-        rule: '#2B2B29',
-        muted: '#8A8A85',
-        accent: '#C9622E',
-        'accent-bright': '#E08148',
+        rule: '#3A3D42',
+        muted: '#9B9C9F',
+        accent: '#C8102E',
+        'accent-bright': '#E2434F',
       },
       fontFamily: {
         display: ['"Space Grotesk"', 'sans-serif'],

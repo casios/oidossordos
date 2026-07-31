@@ -39,7 +39,7 @@ apps/
 - **Filtro de excepciones** que traduce el constraint `EXCLUDE` de Postgres (choque de horario) a `409 SCHEDULE_CONFLICT`, tal como se definió en `diseno-api.md`.
 - **Módulo de eventos** como referencia del patrón completo (listado con filtros, detalle, alta con moderación, alta de line-up).
 - **Motor de homologación de bandas** (`apps/etl/matching/band_matcher.py`) con la cascada MBID → exacto → determinístico → fuzzy, y la salvaguarda de bandas tributo — **con test real que pasa** (`test_band_matcher.py`), cubriendo el caso central del plan de pruebas.
-- **Frontend**: layout base, tokens de Tailwind (negro/gris/blanco/cobre, ya definitivos), y la página Home conectada a la API real.
+- **Frontend**: marco general del sitio (Propuesta A — masthead + nav persistentes + layout de dos columnas con panel lateral, ver `diseno-frontend.md` sección 5.0) implementado en componentes reutilizables (`Masthead`, `PrimaryNav`, `UtilityBar`, `PageLayout`, `SidebarCard`), tokens de Tailwind con la paleta definitiva (carbón + rojo), y dos páginas reales conectadas a la API: Home (listado con filtros) y detalle de evento (con `LineupStageList` agrupando el cartel por escenario).
 - **CI**: workflows de GitHub Actions para API y ETL, tal como se diseñaron en `diseno-cicd.md`.
 
 ## Qué falta (siguientes pasos naturales)
@@ -47,5 +47,5 @@ apps/
 - Módulos de `bands`, `venues`, `moderation`, `users`, `reminders` en la API — mismo patrón que `events`, no hay decisiones de diseño pendientes, es repetir la estructura.
 - Scrapers reales de Metal Archives/Metal Storm (Scrapy) y clientes de Bandsintown/MusicBrainz/Setlist.fm — el motor de matching ya está listo para recibirlos.
 - OAuth (Google/Discord) — el flujo está diseñado en `diseno-autenticacion.md`, falta la integración con Passport strategies concretas.
-- Resto de pantallas del frontend (ya hay mockups HTML de referencia para todas en la conversación de diseño).
+- Resto de páginas del frontend sobre el marco ya construido: `/bandas`, `/bandas/[slug]`, `/venues`, `/venues/[slug]`, `/moderacion`, y los tres formularios de alta (mockups HTML de referencia ya existen para todas).
 - Workflow de CI del frontend y los tres workflows de CD (staging/producción) de `diseno-cicd.md`.
