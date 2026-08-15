@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+apps/web/.next/
+apps/web/out/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Environment (nunca commitear secretos)
+.env
+.env.*
+!.env.example
+
+# Python (ETL)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+*.swp

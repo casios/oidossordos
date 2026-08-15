@@ -10,8 +10,10 @@ services:
       POSTGRES_USER: agenda_metal
       POSTGRES_PASSWORD: dev_password
       POSTGRES_DB: agenda_metal_dev
+    # 5433 en el host para no chocar con un Postgres nativo (Homebrew) en 5432.
+    # Dentro de la red de compose los servicios siguen usando postgres:5432.
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -28,6 +30,9 @@ services:
   api:
     build:
       context: ./apps/api
+    # En dev corremos en modo watch: compila al vuelo y no depende de un
+    # dist/ pre-construido (el volumen ./apps/api:/app taparía el dist de la imagen).
+    command: npm run start:dev
     ports:
       - "3001:3001"
     environment:
