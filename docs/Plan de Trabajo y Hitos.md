@@ -22,7 +22,7 @@ Tres bloqueos concretos, en orden de gravedad:
 |---|---|---|---|
 | 2.1 | Monorepo | ✅ | `apps/{web,api,etl}`, sin workspaces |
 | 2.2 | Docker Compose local | ✅ | `docker-compose.yml`, Postgres en 5433 (host) |
-| 2.3 | Pipeline CI/CD | ❌ | no existe `.github/` |
+| 2.3 | Pipeline CI/CD | ⚠️ | CI de los tres servicios en `.github/workflows/`; CD sin empezar |
 | 2.4 | Staging y producción | ❌ | — |
 | 3.1 | Modelo de usuario | ✅ | `schema.prisma` (`users`, `refresh_tokens`, `auth_tokens`) |
 | 3.2 | Registro / login / recuperación | ⚠️ | registro, login, refresh, logout y logout-all en `auth.service.ts`; faltan verificación de email, forgot/reset password y `GET /auth/me` |
@@ -44,7 +44,8 @@ Tres bloqueos concretos, en orden de gravedad:
 | 9.1 | Diseño UI/UX | ⚠️ | tokens y marco implementados; **sin documento de diseño** |
 | 9.2–9.3 | Listado, filtros, detalle | ✅ | `app/page.tsx`, `app/eventos/[slug]/page.tsx` |
 | 9.4–9.9 | Perfil, formularios de alta, estados | ❌ | — |
-| 10.1–10.4 | QA | ⚠️ | 1 archivo de test en todo el repo |
+| 10.1 | Pruebas unitarias backend | ⚠️ | 17 en la API (guards + filtro), 2 en el ETL; falta cubrir services |
+| 10.2–10.4 | Integración, E2E, carga | ❌ | scripts en su lugar, pasando en vacío |
 | 11 | Despliegue | ❌ | — |
 
 ### Deuda documental
@@ -69,7 +70,7 @@ Las 21 referencias a nombres de archivo inexistentes que había en comentarios d
 
 | Hito | Descripción | Entregables (WBS) | Criterio de aceptación | Semana |
 |---|---|---|---|---|
-| **M1** | Red de seguridad y saneamiento | 2.3, 10.1 | CI corriendo en GitHub Actions para los tres servicios; `pytest` en `requirements.txt`; jest configurado en API con al menos un test por guard; las 18 referencias a docs corregidas | 1-2 |
+| ~~**M1**~~ | ~~Red de seguridad y saneamiento~~ | 2.3, 10.1 | **Completado el 7 de septiembre de 2026.** CI de los tres servicios; `requirements-dev.txt` con pytest y ruff; jest en la API con 17 pruebas (tres guards + filtro); eslint en API y web; referencias a docs corregidas | ~~1-2~~ |
 | **M2** | Flujo de contenido de punta a punta | 3.5, 4.2 | Un usuario captura una banda, un moderador la aprueba y aparece en el listado público, sin tocar la base de datos a mano. Incluye `bands` y `venues` con el patrón de `events`, cola de moderación y `moderation_log` escribiéndose | 3-5 |
 | **M3** | Auth completo | 3.2, 3.3 | Verificación de email, forgot/reset password, `GET /auth/me` y OAuth Google/Discord funcionando. **Requiere escribir antes `diseno-autenticacion.md`** — decidir PKCE y vinculación de cuentas en el código es cómo se acumula deuda | 6-7 |
 | **M4** | Primer scraper en producción | 5.1, 5.5, 5.6 | `apps/etl/tasks/` con una fuente real end-to-end: extracción → normalización → `match_band` → escritura con `status=pendiente` → fila en `etl_runs`. Beat deja de fallar | 8-9 |
@@ -91,6 +92,22 @@ Las 21 referencias a nombres de archivo inexistentes que había en comentarios d
 | H7 (likes, bookmarks, recordatorios) | M7 | sin cambio |
 | H8-H9 (QA y despliegue) | M8 | sin cambio |
 | — | M2 (moderación) | **no tenía hito propio en el plan original**; es el bloqueante del MVP |
+
+### Hallazgo de M1: el constraint de choque de horario nunca existió
+
+Al agregar al CI el paso que aplica `manual-constraints.sql` sobre la base migrada, falló:
+
+```
+ERROR: functions in index expression must be marked IMMUTABLE
+```
+
+Causa: Prisma traduce `DateTime` a `timestamp` **sin zona horaria**, mientras que el diseño (decisión 11 del documento de base de datos y todo `Schema SQL.md`) especifica `timestamptz`. Sobre columnas sin zona, `tstzrange(start_time, end_time)` necesita un cast que depende de la variable `TimeZone` de la sesión, y Postgres se niega a indexarlo.
+
+Consecuencia: **el `EXCLUDE` de solapamiento no existía en ninguna base creada desde este repo**, y `PrismaExceptionFilter` traducía un error que nunca podía ocurrir. La regla de negocio más citada del proyecto no estaba aplicada en ningún lado.
+
+Corregido en la migración `20260907120000_timestamptz_en_marcas_de_tiempo` (41 columnas). Verificado de punta a punta contra un Postgres real: migración desde cero → `manual-constraints.sql` sin errores → dos bandas solapadas en el mismo escenario → el `INSERT` se rechaza con el nombre de constraint que el filtro busca.
+
+Lección para los hitos siguientes: los constraints que Prisma no expresa no los cubre ninguna prueba de aplicación. El paso de `manual-constraints.sql` en el CI es lo único que los vigila; no lo quites de `ci-api.yml`.
 
 ### Riesgo nuevo
 
