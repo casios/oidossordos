@@ -10,7 +10,7 @@ que exista ese documento, este test es la especificación ejecutable de la regla
 una banda con marcador de tributo en el nombre nunca se homologa automáticamente
 contra la banda original, por alto que sea el score de similitud.
 """
-from matching.band_matcher import IncomingBand, ExistingBand, match_band
+from matching.band_matcher import ExistingBand, IncomingBand, match_band
 
 
 def test_tribute_band_never_auto_merges_with_original_even_at_high_score():

@@ -2,6 +2,7 @@
 # Ver `docs/Diseño del Módulo ETL.md` sección 5.1 — horarios escalonados por fuente.
 # OJO: el paquete `tasks/` está vacío; estas cinco tareas todavía no existen.
 import os
+
 from celery import Celery
 from celery.schedules import crontab
 
