@@ -1,6 +1,6 @@
 # apps/etl/matching/band_matcher.py
 """
-Motor de homologación de bandas — ver diseno-etl.md sección 4.
+Motor de homologación de bandas — ver `docs/Diseño del Módulo ETL.md` sección 4.
 
 Cascada, de más a menos estricta:
   0. MusicBrainz ID (MBID) como clave maestra, cuando está disponible.
@@ -18,7 +18,11 @@ import unicodedata
 from dataclasses import dataclass
 from rapidfuzz import fuzz
 
-# Multi-idioma, ver diseno-etl.md sección 4 punto 5.
+# Marcadores multi-idioma. La salvaguarda de tributos NO está en
+# `docs/Diseño del Módulo ETL.md` (su sección 4 describe la cascada de
+# matching sin mencionar tributos); el único respaldo escrito es RF-07c en
+# `docs/Documentación de Proyecto.md`. La especificación viva de la regla es
+# `test_band_matcher.py` — si agregas un marcador, agrega también su caso ahí.
 TRIBUTE_MARKERS = [
     "tributo", "tribute", "cover band", "cover", "homenaje",
 ]
@@ -82,7 +86,8 @@ def match_band(
             is_tribute_candidate=False,
         )
 
-    # Paso 0: MBID como clave maestra — ver diseno-etl.md sección 4 punto 0.
+    # Paso 0: MBID como clave maestra — ver `docs/Diseño del Módulo ETL.md`
+    # sección 4 punto 0.
     if incoming.mbid and existing_by_mbid:
         return MatchResult(
             band_id=existing_by_mbid.id,

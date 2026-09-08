@@ -1,5 +1,8 @@
 // apps/api/prisma/schema.prisma
-// Derivado de /docs/schema.sql — misma fuente de verdad, traducida a Prisma DSL.
+// Derivado de docs/Schema SQL.md, traducido a Prisma DSL. Ojo: este archivo ya
+// va adelante del documento — refresh_tokens, auth_tokens, push_subscriptions
+// y system_settings existen solo aquí. Para esas cuatro tablas, la fuente de
+// verdad es este schema.
 
 generator client {
   provider = "prisma-client-js"

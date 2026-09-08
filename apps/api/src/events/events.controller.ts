@@ -20,7 +20,7 @@ import { CreateEventDto, CreateLineupEntryDto, ListEventsQueryDto } from './dto/
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
-  // Pública: solo status=aprobado si no hay sesión (ver diseno-api.md 3.5)
+  // Pública: solo status=aprobado si no hay sesión (ver `docs/Diseño API.md` sección 3.5)
   @Get()
   async list(@Query() query: ListEventsQueryDto) {
     return this.eventsService.list(query);

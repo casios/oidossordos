@@ -1,6 +1,7 @@
 // apps/web/tailwind.config.ts
-// Tokens tomados directamente de diseno-frontend.md sección 5.2 —
-// fondo carbón oscuro, blanco hueso, rojo como único acento (referencia W:O:A).
+// Fondo carbón oscuro, blanco hueso, rojo como único acento (referencia W:O:A).
+// No hay documento de diseño de frontend en `docs/`: estos tokens son la única
+// definición de la paleta, así que no hardcodees hex fuera de aquí.
 import type { Config } from 'tailwindcss';
 
 const config: Config = {

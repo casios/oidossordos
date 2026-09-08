@@ -75,7 +75,7 @@ export class ListEventsQueryDto {
 
   @IsOptional()
   @IsIn(['true', 'false', 'all'])
-  isTribute?: string; // filtro derivado — ver diseno-api.md 3.5
+  isTribute?: string; // filtro derivado — ver `docs/Diseño API.md` sección 3.5
 
   @IsOptional()
   @Type(() => Number)

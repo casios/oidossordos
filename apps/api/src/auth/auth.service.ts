@@ -19,7 +19,11 @@ interface TokenPair {
 
 function hashToken(token: string): string {
   // Los refresh tokens son opacos (no JWT); solo se guarda el hash,
-  // nunca el valor crudo (ver diseno-autenticacion.md sección 1 y 2).
+  // nunca el valor crudo. El mecanismo general (15 min de access token,
+  // refresh rotativo de 7 días en cookie httpOnly) está en `docs/Diseño
+  // API.md` sección 2.1; el modelo vive en `prisma/schema.prisma`
+  // (`RefreshToken.tokenHash`), no en `docs/Schema SQL.md`, que no incluye
+  // las tablas de autenticación.
   return crypto.createHash('sha256').update(token).digest('hex');
 }
 
@@ -43,8 +47,9 @@ export class AuthService {
     });
 
     // TODO: generar auth_tokens (type=email_verification) y disparar email
-    // vía el servicio de notificaciones (ver diseno-recordatorios.md para
-    // el patrón de envío, aunque este token no es un "reminder").
+    // vía el servicio de notificaciones (ver `docs/Diseño del Módulo de
+    // Recordatorios.md` sección 6 para el patrón de envío, aunque este
+    // token no es un "reminder").
 
     return { id: user.id, email: user.email };
   }
@@ -58,7 +63,8 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { email } });
 
     // Mismo mensaje de error exista o no el usuario/contraseña — evita
-    // enumeración de cuentas (ver diseno-autenticacion.md sección 5).
+    // enumeración de cuentas. No está documentado en `docs/`: es una
+    // decisión de esta implementación, consérvala al tocar este método.
     if (!user || !user.passwordHash) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
@@ -104,9 +110,11 @@ export class AuthService {
   }
 
   /**
-   * Rotación de refresh token con detección de reutilización.
-   * Ver diseno-autenticacion.md sección 3.3 — es la pieza de seguridad
-   * central de este módulo.
+   * Rotación de refresh token con detección de reutilización — la pieza de
+   * seguridad central de este módulo. `docs/Diseño API.md` sección 2.2 lista
+   * el endpoint (`POST /auth/refresh`) y su sección 2.1 remite, para el
+   * detalle del flujo, a un `diseno-autenticacion.md` que nunca se escribió:
+   * hasta que exista, este método es la especificación de la regla.
    */
   async refresh(rawRefreshToken: string): Promise<TokenPair> {
     const tokenHash = hashToken(rawRefreshToken);

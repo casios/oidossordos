@@ -22,7 +22,7 @@ export class JwtAuthGuard implements CanActivate {
     const token = authHeader.slice('Bearer '.length);
 
     try {
-      // El payload trae { sub, role } — ver diseno-autenticacion.md sección 1.
+      // El payload trae { sub, role } — ver `docs/Diseño API.md` sección 2.1.
       // La autorización real (verificar el rol contra la BD en operaciones
       // sensibles) vive en RolesGuard/OwnershipGuard, no acá.
       req.user = this.jwt.verify(token);

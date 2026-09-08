@@ -5,7 +5,7 @@ import { Response } from 'express';
 
 /**
  * Traduce errores de Postgres/Prisma al formato de error estándar de la API
- * (ver diseno-api.md sección 1.3). El caso más importante: el constraint
+ * (ver `docs/Diseño API.md` sección 1.3). El caso más importante: el constraint
  * EXCLUDE de choque de horario (código 23P01, exclusion_violation) se mapea
  * directo a 409 SCHEDULE_CONFLICT en vez de dejar pasar un 500 genérico.
  */

@@ -13,7 +13,7 @@ type Entity = 'band' | 'venue' | 'event';
  * Permite la acción si:
  *  - el usuario es Moderador/Administrador, o
  *  - el usuario es el creador del recurso Y el recurso sigue `pendiente`
- *    (ver diseno-api.md, matriz de autorización: "editar su propio
+ *    (ver `docs/Diseño API.md` sección 2.3, matriz de autorización: "editar su propio
  *    contenido pendiente" vs. "editar contenido de otros").
  * Una vez aprobado, solo Moderador+ puede editar, incluso el creador original.
  */

@@ -12,7 +12,10 @@ import { EventsService } from './events/events.service';
 @Module({
   imports: [
     JwtModule.register({
-      secret: process.env.JWT_SECRET, // en producción: par de llaves RS256, ver diseno-autenticacion.md
+      // En producción debería ser un par de llaves RS256 en vez de un secreto
+      // simétrico, pero esa decisión no está escrita en ningún documento:
+      // `docs/Diseño API.md` sección 2.1 solo define el payload y los TTL.
+      secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '15m' },
     }),
   ],

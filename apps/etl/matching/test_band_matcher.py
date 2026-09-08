@@ -1,6 +1,14 @@
 # apps/etl/matching/test_band_matcher.py
 """
-Ver plan-de-pruebas.md sección 2.3 — "el caso central del matching".
+Salvaguarda de bandas tributo — RF-07c (`docs/Documentación de Proyecto.md`).
+
+La regla que se prueba aquí no está escrita en ningún documento de diseño: el
+plan de pruebas que la cubriría (secciones 2.3/2.4, citadas desde
+`docs/Diseño de CI CD.md`) nunca se escribió, y `docs/Diseño del Módulo ETL.md`
+sección 4 describe la cascada de matching pero no menciona los tributos. Hasta
+que exista ese documento, este test es la especificación ejecutable de la regla:
+una banda con marcador de tributo en el nombre nunca se homologa automáticamente
+contra la banda original, por alto que sea el score de similitud.
 """
 from matching.band_matcher import IncomingBand, ExistingBand, match_band
 

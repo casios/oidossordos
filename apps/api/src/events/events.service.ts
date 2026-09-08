@@ -13,7 +13,9 @@ export class EventsService {
     const limit = Math.min(query.limit ?? 20, 100);
 
     // deleted_at IS NULL siempre — es el filtro por defecto que toda
-    // consulta pública debe aplicar (ver diseno-base-de-datos.md decisión 12).
+    // consulta pública debe aplicar (ver `docs/Diseño API.md` sección 5,
+    // "Soft delete implementado"). No hay middleware de Prisma que lo
+    // aplique solo: es responsabilidad de cada query.
     const where: any = {
       deletedAt: null,
       status: 'aprobado',
@@ -116,8 +118,9 @@ export class EventsService {
     let candidate = base;
     let n = 1;
 
-    // Respeta el índice único parcial (solo entre registros activos) —
-    // ver diseno-base-de-datos.md decisión 12.
+    // Respeta el índice único parcial (solo entre registros activos):
+    // `idx_events_slug_active` en `docs/Schema SQL.md`, replicado en
+    // `prisma/manual-constraints.sql`.
     while (
       await this.prisma.event.findFirst({
         where: { slug: candidate, deletedAt: null },

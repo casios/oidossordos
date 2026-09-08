@@ -20,9 +20,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="bg-black text-fg font-display">
-        {/* Marco general (Propuesta A) — masthead + nav persistentes en
-            todo el sitio; la barra utilitaria y el layout de dos columnas
-            son responsabilidad de cada página, ver diseno-frontend.md 5.0 */}
+        {/* Marco general: masthead + nav persistentes en todo el sitio; la barra
+            utilitaria y el layout de dos columnas son responsabilidad de cada
+            página (PageLayout / UtilityBar). No hay documento de diseño de
+            frontend en `docs/` — este layout es la referencia. */}
         <Masthead />
         <PrimaryNav />
         {children}

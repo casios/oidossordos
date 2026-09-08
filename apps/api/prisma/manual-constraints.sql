@@ -5,7 +5,7 @@
 -- aplica a mano después de la primera migración de Prisma (`prisma migrate dev`),
 -- agregándolo al archivo de migración generado o corriéndolo aparte.
 --
--- Ver /docs/schema.sql para el DDL completo y comentado — esto es solo el
+-- Ver docs/Schema SQL.md para el DDL completo y comentado — esto es solo el
 -- delta que Prisma no puede generar por sí solo.
 
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
@@ -33,7 +33,9 @@ ALTER TABLE events ADD CONSTRAINT chk_event_dates
   CHECK (end_date IS NULL OR end_date >= start_date);
 
 -- El constraint central del proyecto: impide que dos bandas queden agendadas
--- al mismo tiempo en el mismo escenario. Ver diseno-base-de-datos.md sección 5.
+-- al mismo tiempo en el mismo escenario. El DDL original está en
+-- docs/Schema SQL.md; el porqué de modelar escenarios como entidades propias,
+-- en la decisión 5 de docs/Diseño de Base de Datos V1.md.
 ALTER TABLE event_bands ADD CONSTRAINT excl_stage_time_overlap
   EXCLUDE USING GIST (
     event_stage_id WITH =,
