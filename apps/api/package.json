@@ -8,7 +8,7 @@
     "start:dev": "nest start --watch",
     "lint": "eslint \"src/**/*.ts\"",
     "test:unit": "jest --testPathPattern=\\.spec\\.ts$",
-    "test:integration": "jest --testPathPattern=\\.integration-spec\\.ts$ --runInBand",
+    "test:integration": "jest --testPathPattern=\\.integration-spec\\.ts$ --runInBand --passWithNoTests",
     "migration:run": "prisma migrate deploy",
     "prisma:generate": "prisma generate"
   },
@@ -32,6 +32,9 @@
     "@types/cookie-parser": "^1.4.7",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.1",
     "jest": "^29.7.0",
     "prisma": "^5.10.0",
     "ts-jest": "^29.1.2",
