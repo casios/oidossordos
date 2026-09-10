@@ -1,0 +1,6 @@
+# apps/etl/requirements-dev.txt
+# Dependencias de desarrollo y CI. Se mantienen fuera de requirements.txt para
+# no meterlas en la imagen de producción (el Dockerfile solo instala aquél).
+-r requirements.txt
+pytest==9.1.1
+ruff==0.16.6

@@ -1,0 +1,35 @@
+# .github/workflows/ci-etl.yml
+# Ver docs/Diseño de CI CD.md sección 2.3.
+name: CI - ETL
+
+on:
+  pull_request:
+    paths: ['apps/etl/**', '.github/workflows/ci-etl.yml']
+  push:
+    branches: [main]
+    paths: ['apps/etl/**', '.github/workflows/ci-etl.yml']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/etl
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          # Igual que el Dockerfile del servicio; el código usa sintaxis de
+          # tipos de 3.10+ (`str | None`) y no corre en versiones anteriores.
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: apps/etl/requirements-dev.txt
+
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check .
+      - run: pytest -v
+
+      # El ETL sí se empaqueta en contenedor (a diferencia de web y API, que
+      # se despliegan directo desde el build) — ver diseño sección 2.3 paso 4.
+      - name: Build de la imagen Docker
+        run: docker build -t agenda-metal-etl:ci .

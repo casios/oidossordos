@@ -16,6 +16,7 @@ Cascada, de más a menos estricta:
 import re
 import unicodedata
 from dataclasses import dataclass
+
 from rapidfuzz import fuzz
 
 # Marcadores multi-idioma. La salvaguarda de tributos NO está en

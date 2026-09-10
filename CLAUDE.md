@@ -17,8 +17,8 @@ El repo es un scaffold parcial: hay mucho diseño escrito y poca implementación
 - **API**: solo `auth/` y `events/` están implementados. `bands`, `venues`, `moderation`, `users`, `reminders` no existen (ver los comentarios en `apps/api/src/app.module.ts`).
 - **ETL**: solo existe el motor de matching. `apps/etl/tasks/` está **vacío**, pero `celery_app.py` agenda `tasks.bandsintown.run`, `tasks.setlist_fm.run`, `tasks.metal_archives.run`, `tasks.metal_storm.run` y `tasks.reminders.dispatch` — beat falla al despachar hasta que se escriban.
 - **Web**: solo Home (`app/page.tsx`) y detalle de evento (`app/eventos/[slug]/page.tsx`). No hay `/bandas`, `/venues`, `/moderacion` ni formularios de alta.
-- **CI/CD**: **no existe `.github/`**. El diseño de los pipelines (con los YAML de referencia) está en `docs/Diseño de CI CD.md`.
-- **Pruebas**: el único test real es `apps/etl/matching/test_band_matcher.py`. En la API y el web hay scripts `test:unit` pero **cero archivos de test y ninguna config de jest**, así que hoy fallan con "no tests found". `next lint` tampoco tiene config de eslint todavía.
+- **CI**: los tres workflows existen (`.github/workflows/ci-{api,etl,web}.yml`) y corren por `paths:`. Los tres de **CD** siguen sin escribirse; el diseño está en `docs/Diseño de CI CD.md`.
+- **Pruebas**: 19 en total — 17 unitarias en la API (los tres guards y el filtro de excepciones) y 2 del matcher del ETL. **No hay pruebas de integración ni de componentes**: esos scripts pasan en vacío con `--passWithNoTests`.
 
 ## Documentación de diseño (`docs/`)
 
@@ -51,12 +51,17 @@ cd apps/api && npx prisma migrate dev
 psql $DATABASE_URL -f prisma/manual-constraints.sql   # el delta que Prisma no expresa
 npx prisma generate                                    # tras cambiar el schema
 
-# Tests (hoy solo el del ETL corre de verdad)
-cd apps/etl && pytest -v                               # pytest NO está en requirements.txt
+# Tests y lint (lo mismo que corre el CI)
+cd apps/api && npm run lint && npx tsc --noEmit && npm run test:unit
+cd apps/etl && pip install -r requirements-dev.txt && ruff check . && pytest -v
+cd apps/web && npm run lint && npx tsc --noEmit && npm run build
+
+# Un solo test
+cd apps/api && npx jest ownership.guard
 cd apps/etl && pytest matching/test_band_matcher.py::test_tribute_band_never_auto_merges_with_original_even_at_high_score
 ```
 
-`pytest` debe correrse **desde `apps/etl`**: el test importa `from matching.band_matcher import ...`, no funciona desde la raíz.
+`pytest` debe correrse **desde `apps/etl`** (lo resuelve `pytest.ini` con `pythonpath = .`; sin eso el import `from matching.band_matcher import ...` no encuentra el paquete). El ETL necesita **Python 3.10+** por la sintaxis `str | None`: con el 3.9 del sistema no corre.
 
 ### Puertos y conexión a la base de datos
 
@@ -93,6 +98,7 @@ Server Components que llaman a `lib/api-client.ts` con `next: { revalidate: 60 }
 - **Soft delete**: `bands`, `venues`, `events` nunca se borran físicamente (`deleted_at`). Toda consulta pública filtra `deletedAt: null` **y** `status: 'aprobado'` — no hay middleware de Prisma que lo aplique solo, es responsabilidad de cada query. Los slugs son únicos solo entre registros activos (índice parcial `WHERE deleted_at IS NULL`), así que un slug se puede reutilizar tras un borrado.
 - **Listados públicos excluyen tributos por defecto**: `GET /events` filtra `eventBands: { none: { band: { isTribute: true } } }` salvo que llegue `isTribute=true` o `isTribute=all`.
 - **Choque de horario**: lo garantiza el constraint `EXCLUDE ... USING GIST` `excl_stage_time_overlap` en `event_bands` (no una validación de aplicación) — ver `apps/api/prisma/manual-constraints.sql`. El filtro de excepciones lo traduce a `409 SCHEDULE_CONFLICT`.
+- **Todo `DateTime` de Prisma lleva `@db.Timestamptz(3)`**, sin excepción (salvo los tres `@db.Date`). No es cosmético: el default de Prisma es `timestamp` *sin* zona, y con esas columnas el `EXCLUDE` **no se puede crear** — `tstzrange()` sobre `timestamp` exige un cast que Postgres considera no inmutable, y falla con "functions in index expression must be marked IMMUTABLE". Así estuvo el esquema hasta el 7 de septiembre de 2026: el constraint nunca existió en ninguna base. Si agregas un campo de fecha, anótalo.
 - **Refresh tokens**: opacos (no JWT), se guarda solo el `sha256`. Rotan por *family*; si llega uno ya revocado se asume robo de sesión y se revoca **toda la family**, no solo ese token (`auth.service.ts:refresh`).
 - **Interruptores de notificación**: hay uno global (`system_settings.notifications_enabled`, cacheado en Redis 30s) y uno por usuario (`users.notifications_paused_at`). Un recordatorio de un evento que ya pasó nunca se envía tarde tras reactivar — ver `docs/Diseño del Módulo de Recordatorios.md` sección 5.
 
